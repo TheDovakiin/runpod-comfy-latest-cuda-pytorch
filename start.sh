@@ -3,6 +3,17 @@
 # Set up better terminal experience
 export PS1="\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ "
 
+# CRITICAL: Configure pip to use network storage for ALL installations
+export PYTHONUSERBASE="/workspace/.local"
+export PATH="/workspace/.local/bin:$PATH"
+export PIP_CACHE_DIR="/workspace/.pip-cache"
+export PIP_USER=1
+
+# Create necessary directories in network storage
+mkdir -p /workspace/.local/lib/python3.11/site-packages
+mkdir -p /workspace/.local/bin
+mkdir -p /workspace/.pip-cache
+
 # Ensure we're in the workspace directory (network storage)
 cd /workspace
 
@@ -15,15 +26,23 @@ if [ ! -d "/workspace/ComfyUI" ]; then
     
     echo "✅ ComfyUI copied to network storage (/workspace)"
     
+    # Environment is configured - all future pip installs will go to network storage automatically
+    
     # Create helper scripts that work from network storage
     echo "#!/bin/bash" > run_gpu.sh
+    echo "export PYTHONUSERBASE=\"/workspace/.local\"" >> run_gpu.sh
+    echo "export PATH=\"/workspace/.local/bin:\$PATH\"" >> run_gpu.sh
+    echo "export PIP_USER=1" >> run_gpu.sh
     echo "cd /workspace/ComfyUI" >> run_gpu.sh
-    echo "python main.py --preview-method auto --listen --port 8188 --listen 0.0.0.0" >> run_gpu.sh
+    echo "python main.py --preview-method auto --listen --port 8188" >> run_gpu.sh
     chmod +x run_gpu.sh
 
     echo "#!/bin/bash" > run_cpu.sh
+    echo "export PYTHONUSERBASE=\"/workspace/.local\"" >> run_cpu.sh
+    echo "export PATH=\"/workspace/.local/bin:\$PATH\"" >> run_cpu.sh
+    echo "export PIP_USER=1" >> run_cpu.sh
     echo "cd /workspace/ComfyUI" >> run_cpu.sh
-    echo "python main.py --preview-method auto --listen --port 8188 --listen 0.0.0.0 --cpu" >> run_cpu.sh
+    echo "python main.py --preview-method auto --listen --port 8188 --cpu" >> run_cpu.sh
     chmod +x run_cpu.sh
     
     # Create update script
@@ -37,26 +56,53 @@ if [ ! -d "/workspace/ComfyUI" ]; then
     
     # Create JupyterLab startup script
     echo "#!/bin/bash" > start_jupyter.sh
+    echo "export PYTHONUSERBASE=\"/workspace/.local\"" >> start_jupyter.sh
+    echo "export PATH=\"/workspace/.local/bin:\$PATH\"" >> start_jupyter.sh
     echo "cd /workspace" >> start_jupyter.sh
-    echo "jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token='' --NotebookApp.password=''" >> start_jupyter.sh
+    echo "jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --ServerApp.token='' --ServerApp.password='' --ServerApp.disable_check_xsrf=True" >> start_jupyter.sh
     chmod +x start_jupyter.sh
+    
+    # Create dependency installer script
+    echo "#!/bin/bash" > install_custom_deps.sh
+    echo "export PYTHONUSERBASE=\"/workspace/.local\"" >> install_custom_deps.sh
+    echo "export PATH=\"/workspace/.local/bin:\$PATH\"" >> install_custom_deps.sh
+    echo "export PIP_CACHE_DIR=\"/workspace/.pip-cache\"" >> install_custom_deps.sh
+    echo "export PIP_USER=1" >> install_custom_deps.sh
+    echo "echo 'Scanning custom nodes for dependencies...'" >> install_custom_deps.sh
+    echo "find /workspace/ComfyUI/custom_nodes -name 'requirements.txt' -exec pip install --user -r {} \;" >> install_custom_deps.sh
+    echo "echo '✅ All custom node dependencies installed to network storage'" >> install_custom_deps.sh
+    chmod +x install_custom_deps.sh
     
     echo "✅ Helper scripts created:"
     echo "  - run_gpu.sh: Start ComfyUI with GPU"
     echo "  - run_cpu.sh: Start ComfyUI with CPU only"
     echo "  - update_comfyui.sh: Update ComfyUI and ComfyUI-Manager"
     echo "  - start_jupyter.sh: Start JupyterLab on port 8888"
+    echo "  - install_custom_deps.sh: Install all custom node dependencies"
 else
     echo "✅ ComfyUI found in network storage - ready to start!"
 fi
 
-# Ensure we always work from network storage
-cd /workspace/ComfyUI
+# ALWAYS set environment for network storage Python packages
+export PYTHONUSERBASE="/workspace/.local"
+export PATH="/workspace/.local/bin:$PATH"
+export PIP_CACHE_DIR="/workspace/.pip-cache"
+export PIP_USER=1
 
-# Start JupyterLab in background
+# Start JupyterLab in background with proper environment
 echo "🚀 Starting JupyterLab on port 8888..."
 cd /workspace
-nohup jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token='' --NotebookApp.password='' > jupyter.log 2>&1 &
+nohup jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --ServerApp.token='' --ServerApp.password='' --ServerApp.disable_check_xsrf=True > jupyter.log 2>&1 &
+
+# Wait a moment for JupyterLab to start
+sleep 3
+
+# Check if JupyterLab started successfully
+if pgrep -f "jupyter-lab" > /dev/null; then
+    echo "✅ JupyterLab started successfully!"
+else
+    echo "❌ JupyterLab failed to start, check jupyter.log"
+fi
 
 # Start ComfyUI
 cd /workspace/ComfyUI
