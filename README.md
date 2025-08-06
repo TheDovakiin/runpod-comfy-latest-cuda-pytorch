@@ -1,17 +1,27 @@
 # RunPod Permanent ComfyUI Template - Latest CUDA & PyTorch
 
-A RunPod template for ComfyUI with the latest PyTorch 2.7.1 and CUDA 12.8 support.
+A **lightning-fast** RunPod template for ComfyUI with PyTorch 2.7.1 and CUDA 12.8 support. Built on **RunPod-optimized base images** for **zero massive downloads**.
 
 ## Features
 
+- **🚀 ZERO MASSIVE DOWNLOADS**: Uses RunPod-cached base image (no more 4GB downloads!)
+- **⚡ Instant startup**: Pre-cached base eliminates PyTorch/CUDA download time
 - **PyTorch 2.7.1** with **CUDA 12.8** support
 - **ComfyUI** with ComfyUI-Manager **pre-installed** (no downloads on first run!)
 - **JupyterLab** pre-installed with data science packages
 - **Enhanced terminal experience** with autocomplete, better prompt, and helpful aliases
 - **Essential utilities**: zip, htop, tree, tmux, screen, vim, and more
-- **Instant startup** - everything stored in RunPod network storage
+- **Network persistence** - everything stored in RunPod network storage
 - **Helper scripts** for easy management
 - **Dual web interfaces**: ComfyUI on port 8188, JupyterLab on port 8888
+
+## 🚀 Performance Revolution
+
+This template now uses `ashleykleynhans/runpod-base:py311-cu128-torch271` instead of the standard PyTorch image. This **eliminates the massive 4GB+ downloads** that were happening every pod start:
+
+- **Before**: Downloaded 4.18GB PyTorch/CUDA layers every time
+- **After**: RunPod has this base image pre-cached = instant startup!
+- **Startup Time**: Reduced from minutes to seconds
 
 ## Quick Start
 

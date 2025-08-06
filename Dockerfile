@@ -1,4 +1,4 @@
-FROM pytorch/pytorch:2.7.1-cuda12.8-cudnn9-runtime
+FROM ashleykleynhans/runpod-base:py311-cu128-torch271
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -40,16 +40,14 @@ RUN echo 'export PS1="\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[0
     echo 'alias la="ls -A"' >> /root/.bashrc && \
     echo 'alias l="ls -CF"' >> /root/.bashrc
 
-# Install JupyterLab and extensions
+# Install additional packages (base image already has JupyterLab)
 RUN python -m pip install --upgrade pip && \
-    python -m pip install jupyterlab ipywidgets matplotlib seaborn plotly notebook && \
-    jupyter lab --generate-config
+    python -m pip install ipywidgets matplotlib seaborn plotly
 
 # Pre-install ComfyUI and dependencies to template location
 RUN cd /opt && \
     git clone https://github.com/comfyanonymous/ComfyUI.git && \
     cd ComfyUI && \
-    python -m pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu128 && \
     python -m pip install -r requirements.txt
 
 # Install ComfyUI-Manager
