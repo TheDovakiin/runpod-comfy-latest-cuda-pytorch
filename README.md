@@ -6,25 +6,27 @@ A RunPod template for ComfyUI with the latest PyTorch 2.7.1 and CUDA 12.8 suppor
 
 - **PyTorch 2.7.1** with **CUDA 12.8** support
 - **ComfyUI** with ComfyUI-Manager **pre-installed** (no downloads on first run!)
+- **JupyterLab** pre-installed with data science packages
 - **Enhanced terminal experience** with autocomplete, better prompt, and helpful aliases
 - **Essential utilities**: zip, htop, tree, tmux, screen, vim, and more
 - **Instant startup** - everything stored in RunPod network storage
 - **Helper scripts** for easy management
-- Web interface on port 8188
+- **Dual web interfaces**: ComfyUI on port 8188, JupyterLab on port 8888
 
 ## Quick Start
 
 ### On RunPod
 
 1. Use this Docker image: `kgabeci/runpod-comfy-latest:latest`
-2. Set port mapping: `8188:8188`
+2. Set port mapping: `8188:8188,8888:8888`
 3. ComfyUI will be available at `http://[your-pod-ip]:8188`
+4. JupyterLab will be available at `http://[your-pod-ip]:8888`
 
 ### Local Development
 
 ```bash
 docker build -t runpod-comfy-latest .
-docker run -p 8188:8188 -v ./workspace:/workspace runpod-comfy-latest
+docker run -p 8188:8188 -p 8888:8888 -v ./workspace:/workspace runpod-comfy-latest
 ```
 
 ## System Requirements
@@ -64,10 +66,12 @@ After first run, you'll find these scripts in `/workspace`:
 - `run_gpu.sh` - Start ComfyUI with GPU acceleration
 - `run_cpu.sh` - Start ComfyUI in CPU-only mode  
 - `update_comfyui.sh` - Update ComfyUI and ComfyUI-Manager to latest versions
+- `start_jupyter.sh` - Start JupyterLab on port 8888
 
 ## Port Configuration
 
 - **8188**: ComfyUI web interface
+- **8888**: JupyterLab interface (no password required)
 
 ## Volume Mapping
 

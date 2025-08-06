@@ -26,6 +26,8 @@ RUN apt-get update && apt-get install -y \
     libxext6 \
     libxrender-dev \
     libgomp1 \
+    nodejs \
+    npm \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install Oh My Zsh for better terminal experience
@@ -38,11 +40,15 @@ RUN echo 'export PS1="\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[0
     echo 'alias la="ls -A"' >> /root/.bashrc && \
     echo 'alias l="ls -CF"' >> /root/.bashrc
 
-# Pre-install ComfyUI and dependencies
+# Install JupyterLab and extensions
+RUN python -m pip install --upgrade pip && \
+    python -m pip install jupyterlab ipywidgets matplotlib seaborn plotly notebook && \
+    jupyter lab --generate-config
+
+# Pre-install ComfyUI and dependencies to template location
 RUN cd /opt && \
     git clone https://github.com/comfyanonymous/ComfyUI.git && \
     cd ComfyUI && \
-    python -m pip install --upgrade pip && \
     python -m pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu128 && \
     python -m pip install -r requirements.txt
 
@@ -57,6 +63,6 @@ WORKDIR /workspace
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
 
-EXPOSE 8188
+EXPOSE 8188 8888
 
 CMD ["/start.sh"]
