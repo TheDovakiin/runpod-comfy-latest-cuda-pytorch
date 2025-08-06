@@ -59,7 +59,8 @@ if [ ! -d "/workspace/ComfyUI" ]; then
     echo "export PYTHONUSERBASE=\"/workspace/.local\"" >> start_jupyter.sh
     echo "export PATH=\"/workspace/.local/bin:\$PATH\"" >> start_jupyter.sh
     echo "cd /workspace" >> start_jupyter.sh
-    echo "jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --ServerApp.token='' --ServerApp.password='' --ServerApp.disable_check_xsrf=True" >> start_jupyter.sh
+    echo "echo 'Starting JupyterLab on port 8888...'" >> start_jupyter.sh
+    echo "jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --allow-origin='*' --no-token" >> start_jupyter.sh
     chmod +x start_jupyter.sh
     
     # Create dependency installer script
@@ -92,16 +93,44 @@ export PIP_USER=1
 # Start JupyterLab in background with proper environment
 echo "🚀 Starting JupyterLab on port 8888..."
 cd /workspace
-nohup jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --ServerApp.token='' --ServerApp.password='' --ServerApp.disable_check_xsrf=True > jupyter.log 2>&1 &
 
-# Wait a moment for JupyterLab to start
-sleep 3
+# Create JupyterLab config file
+mkdir -p ~/.jupyter
+cat > ~/.jupyter/jupyter_lab_config.py << EOF
+c.ServerApp.ip = '0.0.0.0'
+c.ServerApp.port = 8888
+c.ServerApp.open_browser = False
+c.ServerApp.allow_root = True
+c.ServerApp.token = ''
+c.ServerApp.password = ''
+c.ServerApp.disable_check_xsrf = True
+c.ServerApp.allow_origin = '*'
+c.ServerApp.allow_remote_access = True
+EOF
 
-# Check if JupyterLab started successfully
+# Start JupyterLab with simplified command
+nohup jupyter lab > /workspace/jupyter.log 2>&1 &
+
+# Wait for JupyterLab to start
+sleep 5
+
+# Check if JupyterLab is actually running and accessible
 if pgrep -f "jupyter-lab" > /dev/null; then
-    echo "✅ JupyterLab started successfully!"
+    echo "✅ JupyterLab process started!"
+    echo "📝 Check /workspace/jupyter.log for startup logs"
+    
+    # Test if port 8888 is actually listening
+    if netstat -tuln | grep -q ":8888 "; then
+        echo "✅ JupyterLab listening on port 8888!"
+    else
+        echo "❌ JupyterLab not listening on port 8888"
+        echo "📝 JupyterLab logs:"
+        tail -10 /workspace/jupyter.log
+    fi
 else
-    echo "❌ JupyterLab failed to start, check jupyter.log"
+    echo "❌ JupyterLab failed to start!"
+    echo "📝 JupyterLab logs:"
+    cat /workspace/jupyter.log
 fi
 
 # Start ComfyUI
