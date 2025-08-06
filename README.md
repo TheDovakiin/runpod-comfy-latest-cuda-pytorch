@@ -14,7 +14,7 @@ A RunPod template for ComfyUI with the latest PyTorch 2.7.1 and CUDA 12.8 suppor
 
 ### On RunPod
 
-1. Use this Docker image: `[YOUR_DOCKERHUB_USERNAME]/runpod-comfy-latest:latest`
+1. Use this Docker image: `kgabeci/runpod-comfy-latest:latest`
 2. Set port mapping: `8188:8188`
 3. ComfyUI will be available at `http://[your-pod-ip]:8188`
 
