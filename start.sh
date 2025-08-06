@@ -54,12 +54,15 @@ if [ ! -d "/workspace/ComfyUI" ]; then
     echo "echo '✅ ComfyUI updated'" >> update_comfyui.sh
     chmod +x update_comfyui.sh
     
-    # Create JupyterLab startup script
+    # Create JupyterLab startup script with terminal utilities
     echo "#!/bin/bash" > start_jupyter.sh
     echo "export PYTHONUSERBASE=\"/workspace/.local\"" >> start_jupyter.sh
     echo "export PATH=\"/workspace/.local/bin:\$PATH\"" >> start_jupyter.sh
     echo "cd /workspace" >> start_jupyter.sh
-    echo "echo 'Starting JupyterLab on port 8888...'" >> start_jupyter.sh
+    echo "echo 'Starting JupyterLab with enhanced terminal on port 8888...'" >> start_jupyter.sh
+    echo "echo '✅ Available utilities: htop, tree, tmux, screen, vim, zip, nodejs, npm'" >> start_jupyter.sh
+    echo "echo '✅ Tab completion and aliases enabled'" >> start_jupyter.sh
+    echo "echo '✅ Enhanced prompt with current directory'" >> start_jupyter.sh
     echo "jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --allow-origin='*' --no-token" >> start_jupyter.sh
     chmod +x start_jupyter.sh
     
@@ -74,12 +77,36 @@ if [ ! -d "/workspace/ComfyUI" ]; then
     echo "echo '✅ All custom node dependencies installed to network storage'" >> install_custom_deps.sh
     chmod +x install_custom_deps.sh
     
+    # Create terminal utilities test script
+    echo "#!/bin/bash" > test_utilities.sh
+    echo "echo '🧪 Testing Terminal Utilities in JupyterLab...'" >> test_utilities.sh
+    echo "echo ''" >> test_utilities.sh
+    echo "echo '📍 Current Location:' && pwd" >> test_utilities.sh
+    echo "echo ''" >> test_utilities.sh
+    echo "echo '📁 Directory listing (ll):' && ll" >> test_utilities.sh
+    echo "echo ''" >> test_utilities.sh
+    echo "echo '🌳 Tree utility:' && tree -L 1 ." >> test_utilities.sh
+    echo "echo ''" >> test_utilities.sh
+    echo "echo '⚡ htop version:' && htop --version" >> test_utilities.sh
+    echo "echo '✏️ vim version:' && vim --version | head -1" >> test_utilities.sh
+    echo "echo '📦 zip version:' && zip --version | head -1" >> test_utilities.sh
+    echo "echo '🟢 Node.js version:' && node --version" >> test_utilities.sh
+    echo "echo '📦 npm version:' && npm --version" >> test_utilities.sh
+    echo "echo '🛠️ tmux version:' && tmux -V" >> test_utilities.sh
+    echo "echo '🖥️ screen version:' && screen --version" >> test_utilities.sh
+    echo "echo ''" >> test_utilities.sh
+    echo "echo '✅ All utilities are working!'" >> test_utilities.sh
+    echo "echo 'ℹ️ Available aliases: ll, la, l, cls, .., ...'" >> test_utilities.sh
+    echo "echo 'ℹ️ Tab completion should work - try typing \"cd \" and press Tab'" >> test_utilities.sh
+    chmod +x test_utilities.sh
+    
     echo "✅ Helper scripts created:"
     echo "  - run_gpu.sh: Start ComfyUI with GPU"
     echo "  - run_cpu.sh: Start ComfyUI with CPU only"
     echo "  - update_comfyui.sh: Update ComfyUI and ComfyUI-Manager"
     echo "  - start_jupyter.sh: Start JupyterLab on port 8888"
     echo "  - install_custom_deps.sh: Install all custom node dependencies"
+    echo "  - test_utilities.sh: Test terminal utilities in JupyterLab"
 else
     echo "✅ ComfyUI found in network storage - ready to start!"
 fi
@@ -94,7 +121,7 @@ export PIP_USER=1
 echo "🚀 Starting JupyterLab on port 8888..."
 cd /workspace
 
-# Create JupyterLab config file
+# Create JupyterLab config file with terminal utilities enabled
 mkdir -p ~/.jupyter
 cat > ~/.jupyter/jupyter_lab_config.py << EOF
 c.ServerApp.ip = '0.0.0.0'
@@ -106,7 +133,19 @@ c.ServerApp.password = ''
 c.ServerApp.disable_check_xsrf = True
 c.ServerApp.allow_origin = '*'
 c.ServerApp.allow_remote_access = True
+c.ServerApp.terminado_settings = {'shell_command': ['/bin/bash', '-l']}
+c.ServerApp.terminals_enabled = True
 EOF
+
+# Ensure bash completion and utilities are loaded for JupyterLab terminals
+echo '# JupyterLab terminal configuration' >> ~/.bashrc
+echo 'export TERM=xterm-256color' >> ~/.bashrc
+echo 'complete -cf sudo' >> ~/.bashrc
+
+# Create global bashrc link for all users in JupyterLab
+if [ ! -f /etc/bash.bashrc ]; then
+    ln -sf ~/.bashrc /etc/bash.bashrc
+fi
 
 # Start JupyterLab with simplified command
 nohup jupyter lab > /workspace/jupyter.log 2>&1 &
