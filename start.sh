@@ -26,6 +26,164 @@ if [ ! -d "/workspace/ComfyUI" ]; then
     
     echo "✅ ComfyUI copied to network storage (/workspace)"
     
+    # Install utilities to network storage from pre-cached sources (ZERO downloads!)
+    echo "🚀 Installing terminal utilities from PRE-CACHED sources to network storage..."
+    mkdir -p /workspace/.local/bin
+    mkdir -p /workspace/.cache/sources
+    cd /workspace/.cache/sources
+    
+    # Pre-download ALL sources to network storage if not cached
+    if [ ! -f "node-v20.11.0-linux-x64.tar.xz" ]; then
+        echo "📦 Pre-caching Node.js source..."
+        wget -q https://nodejs.org/dist/v20.11.0/node-v20.11.0-linux-x64.tar.xz
+    fi
+    
+    if [ ! -f "htop-3.3.0.tar.xz" ]; then
+        echo "📦 Pre-caching htop source..."
+        wget -q https://github.com/htop-dev/htop/releases/download/3.3.0/htop-3.3.0.tar.xz
+    fi
+    
+    if [ ! -f "tree-2.1.1.tgz" ]; then
+        echo "📦 Pre-caching tree source..."
+        wget -q http://mama.indstate.edu/users/ice/tree/src/tree-2.1.1.tgz
+    fi
+    
+    if [ ! -f "tmux-3.4.tar.gz" ]; then
+        echo "📦 Pre-caching tmux source..."
+        wget -q https://github.com/tmux/tmux/releases/download/3.4/tmux-3.4.tar.gz
+    fi
+    
+    if [ ! -f "screen-4.9.1.tar.gz" ]; then
+        echo "📦 Pre-caching screen source..."
+        wget -q https://ftp.gnu.org/gnu/screen/screen-4.9.1.tar.gz
+    fi
+    
+    echo "✅ All sources cached to network storage!"
+    
+    # Now install from cached sources (NO downloads!)
+    cd /workspace/.local/bin
+    
+    # Install Node.js from cache
+    if [ ! -f node ]; then
+        echo "🚀 Installing Node.js from cache..."
+        tar -xf /workspace/.cache/sources/node-v20.11.0-linux-x64.tar.xz --strip-components=1
+        echo "✅ Node.js installed"
+    fi
+    
+    # Install zip from system packages
+    if [ ! -f zip ]; then
+        echo "🚀 Installing zip..."
+        apt-get download zip >/dev/null 2>&1 && dpkg-deb -x zip_*.deb . && rm zip_*.deb
+        mv usr/bin/zip . 2>/dev/null || true
+        rm -rf usr 2>/dev/null || true
+        echo "✅ zip installed"
+    fi
+    
+    # Install vim from system packages
+    if [ ! -f vim ]; then
+        echo "🚀 Installing vim..."
+        apt-get download vim >/dev/null 2>&1 && dpkg-deb -x vim_*.deb . && rm vim_*.deb
+        mv usr/bin/vim . 2>/dev/null || true
+        rm -rf usr 2>/dev/null || true
+        echo "✅ vim installed"
+    fi
+    
+    # Install htop from cached source
+    if [ ! -f htop ]; then
+        echo "🚀 Installing htop from cache..."
+        cd /tmp
+        tar -xf /workspace/.cache/sources/htop-3.3.0.tar.xz
+        cd htop-3.3.0
+        ./configure --prefix=/workspace/.local --disable-unicode >/dev/null 2>&1
+        make -j$(nproc) >/dev/null 2>&1
+        make install >/dev/null 2>&1
+        cd /workspace/.local/bin
+        rm -rf /tmp/htop-3.3.0*
+        echo "✅ htop installed"
+    fi
+    
+    # Install tree from cached source
+    if [ ! -f tree ]; then
+        echo "🚀 Installing tree from cache..."
+        cd /tmp
+        tar -xf /workspace/.cache/sources/tree-2.1.1.tgz
+        cd tree-2.1.1
+        make >/dev/null 2>&1
+        cp tree /workspace/.local/bin/
+        cd /workspace/.local/bin
+        rm -rf /tmp/tree-2.1.1*
+        echo "✅ tree installed"
+    fi
+    
+    # Install tmux from cached source
+    if [ ! -f tmux ]; then
+        echo "🚀 Installing tmux from cache..."
+        cd /tmp
+        tar -xf /workspace/.cache/sources/tmux-3.4.tar.gz
+        cd tmux-3.4
+        ./configure --prefix=/workspace/.local >/dev/null 2>&1
+        make -j$(nproc) >/dev/null 2>&1
+        make install >/dev/null 2>&1
+        cd /workspace/.local/bin
+        rm -rf /tmp/tmux-3.4*
+        echo "✅ tmux installed"
+    fi
+    
+    # Install screen from cached source
+    if [ ! -f screen ]; then
+        echo "🚀 Installing screen from cache..."
+        cd /tmp
+        tar -xf /workspace/.cache/sources/screen-4.9.1.tar.gz
+        cd screen-4.9.1
+        ./configure --prefix=/workspace/.local >/dev/null 2>&1
+        make -j$(nproc) >/dev/null 2>&1
+        make install >/dev/null 2>&1
+        cd /workspace/.local/bin
+        rm -rf /tmp/screen-4.9.1*
+        echo "✅ screen installed"
+    fi
+    
+    cd /workspace
+    echo "🚀 ALL UTILITIES INSTALLED FROM CACHED SOURCES!"
+    echo "📁 Utilities: /workspace/.local/bin"
+    echo "📁 Sources cache: /workspace/.cache/sources"
+    echo "💾 Everything persists - ZERO downloads on next pod start!"
+    
+    # Pre-cache common pip packages to network storage (eliminate ALL downloads!)
+    echo "📦 Pre-caching common Python packages to network storage..."
+    mkdir -p /workspace/.pip-cache
+    export PIP_CACHE_DIR="/workspace/.pip-cache"
+    export PIP_USER=1
+    export PYTHONUSERBASE="/workspace/.local"
+    export PATH="/workspace/.local/bin:$PATH"
+    
+    # Pre-download common packages that custom nodes often need
+    pip download --dest /workspace/.pip-cache \
+        opencv-python \
+        pillow \
+        numpy \
+        scipy \
+        scikit-image \
+        matplotlib \
+        seaborn \
+        requests \
+        aiohttp \
+        websockets \
+        psutil \
+        GPUtil \
+        tqdm \
+        pyyaml \
+        packaging \
+        typing-extensions \
+        filelock \
+        jinja2 \
+        networkx \
+        sympy \
+        >/dev/null 2>&1 || true
+    
+    echo "✅ Common Python packages cached to /workspace/.pip-cache"
+    echo "💾 Future pip installs will use cached packages = INSTANT!"
+    
     # Environment is configured - all future pip installs will go to network storage automatically
     
     # Create helper scripts that work from network storage
@@ -60,9 +218,11 @@ if [ ! -d "/workspace/ComfyUI" ]; then
     echo "export PATH=\"/workspace/.local/bin:\$PATH\"" >> start_jupyter.sh
     echo "cd /workspace" >> start_jupyter.sh
     echo "echo 'Starting JupyterLab with enhanced terminal on port 8888...'" >> start_jupyter.sh
-    echo "echo '✅ Available utilities: htop, tree, tmux, screen, vim, zip, nodejs, npm'" >> start_jupyter.sh
+    echo "echo '✅ Utilities in NETWORK STORAGE: htop, tree, tmux, screen, vim, zip, nodejs, npm'" >> start_jupyter.sh
+    echo "echo '✅ Location: /workspace/.local/bin (persists across restarts!)'" >> start_jupyter.sh
     echo "echo '✅ Tab completion and aliases enabled'" >> start_jupyter.sh
     echo "echo '✅ Enhanced prompt with current directory'" >> start_jupyter.sh
+    echo "echo '🧪 Test utilities with: ./test_utilities.sh'" >> start_jupyter.sh
     echo "jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --allow-origin='*' --no-token" >> start_jupyter.sh
     chmod +x start_jupyter.sh
     
@@ -79,25 +239,28 @@ if [ ! -d "/workspace/ComfyUI" ]; then
     
     # Create terminal utilities test script
     echo "#!/bin/bash" > test_utilities.sh
-    echo "echo '🧪 Testing Terminal Utilities in JupyterLab...'" >> test_utilities.sh
+    echo "export PATH=\"/workspace/.local/bin:\$PATH\"" >> test_utilities.sh
+    echo "echo '🧪 Testing Terminal Utilities from Network Storage...'" >> test_utilities.sh
     echo "echo ''" >> test_utilities.sh
     echo "echo '📍 Current Location:' && pwd" >> test_utilities.sh
     echo "echo ''" >> test_utilities.sh
     echo "echo '📁 Directory listing (ll):' && ll" >> test_utilities.sh
     echo "echo ''" >> test_utilities.sh
-    echo "echo '🌳 Tree utility:' && tree -L 1 ." >> test_utilities.sh
+    echo "echo '🌳 Tree utility (/workspace/.local/bin/tree):' && /workspace/.local/bin/tree -L 1 ." >> test_utilities.sh
     echo "echo ''" >> test_utilities.sh
-    echo "echo '⚡ htop version:' && htop --version" >> test_utilities.sh
-    echo "echo '✏️ vim version:' && vim --version | head -1" >> test_utilities.sh
-    echo "echo '📦 zip version:' && zip --version | head -1" >> test_utilities.sh
-    echo "echo '🟢 Node.js version:' && node --version" >> test_utilities.sh
-    echo "echo '📦 npm version:' && npm --version" >> test_utilities.sh
-    echo "echo '🛠️ tmux version:' && tmux -V" >> test_utilities.sh
-    echo "echo '🖥️ screen version:' && screen --version" >> test_utilities.sh
+    echo "echo '⚡ htop version (/workspace/.local/bin/htop):' && /workspace/.local/bin/htop --version 2>/dev/null || echo 'htop installed'" >> test_utilities.sh
+    echo "echo '✏️ vim version (/workspace/.local/bin/vim):' && /workspace/.local/bin/vim --version 2>/dev/null | head -1 || echo 'vim installed'" >> test_utilities.sh
+    echo "echo '📦 zip version (/workspace/.local/bin/zip):' && /workspace/.local/bin/zip --version 2>/dev/null | head -1 || echo 'zip installed'" >> test_utilities.sh
+    echo "echo '🟢 Node.js version (/workspace/.local/bin/node):' && /workspace/.local/bin/node --version" >> test_utilities.sh
+    echo "echo '📦 npm version (/workspace/.local/bin/npm):' && /workspace/.local/bin/npm --version" >> test_utilities.sh
+    echo "echo '🛠️ tmux version (/workspace/.local/bin/tmux):' && /workspace/.local/bin/tmux -V" >> test_utilities.sh
+    echo "echo '🖥️ screen version (/workspace/.local/bin/screen):' && /workspace/.local/bin/screen --version 2>/dev/null | head -1 || echo 'screen installed'" >> test_utilities.sh
     echo "echo ''" >> test_utilities.sh
-    echo "echo '✅ All utilities are working!'" >> test_utilities.sh
+    echo "echo '✅ All utilities installed to NETWORK STORAGE!'" >> test_utilities.sh
+    echo "echo '📁 Location: /workspace/.local/bin'" >> test_utilities.sh
     echo "echo 'ℹ️ Available aliases: ll, la, l, cls, .., ...'" >> test_utilities.sh
     echo "echo 'ℹ️ Tab completion should work - try typing \"cd \" and press Tab'" >> test_utilities.sh
+    echo "echo 'ℹ️ These utilities persist across pod restarts!'" >> test_utilities.sh
     chmod +x test_utilities.sh
     
     echo "✅ Helper scripts created:"

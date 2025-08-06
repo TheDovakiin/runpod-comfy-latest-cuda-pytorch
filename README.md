@@ -7,10 +7,12 @@ A RunPod template for ComfyUI with the latest PyTorch 2.7.1 and CUDA 12.8 suppor
 - **PyTorch 2.7.1** with **CUDA 12.8** support
 - **ComfyUI** with ComfyUI-Manager **pre-installed** (no downloads on first run!)
 - **JupyterLab** pre-installed with data science packages
-- **Enhanced terminal experience** with autocomplete, better prompt, and helpful aliases
-- **Essential utilities**: zip, htop, tree, tmux, screen, vim, and more
+- **🚀 PERSISTENT UTILITIES**: All terminal utilities installed to **network storage**
+  - **htop, tree, tmux, screen, vim, zip, Node.js, npm** in `/workspace/.local/bin`
+  - **Persist across pod restarts** - no re-downloading!
+  - **Enhanced terminal experience** with autocomplete, better prompt, and helpful aliases
 - **Instant startup** - everything stored in RunPod network storage
-- **Helper scripts** for easy management
+- **Helper scripts** for easy management + utilities testing
 - **Dual web interfaces**: ComfyUI on port 8188, JupyterLab on port 8888
 
 ## Quick Start
@@ -64,7 +66,7 @@ The container automatically:
 After first run, you'll find these scripts in `/workspace`:
 
 - `run_gpu.sh` - Start ComfyUI with GPU acceleration
-- `run_cpu.sh` - Start ComfyUI in CPU-only mode  
+- `run_cpu.sh` - Start ComfyUI in CPU-only mode
 - `update_comfyui.sh` - Update ComfyUI and ComfyUI-Manager to latest versions
 - `start_jupyter.sh` - Start JupyterLab on port 8888
 
