@@ -43,6 +43,7 @@ docker run -p 8188:8188 -v ./workspace:/workspace runpod-comfy-latest
 ## First Run Setup
 
 The container automatically:
+
 1. Clones ComfyUI and ComfyUI-Manager
 2. Creates a Python virtual environment
 3. Installs PyTorch with CUDA 12.8 support
@@ -52,6 +53,7 @@ The container automatically:
 ## Helper Scripts
 
 After first run, you'll find these scripts in `/workspace`:
+
 - `run_gpu.sh` - Start ComfyUI with GPU acceleration
 - `run_cpu.sh` - Start ComfyUI in CPU-only mode
 
