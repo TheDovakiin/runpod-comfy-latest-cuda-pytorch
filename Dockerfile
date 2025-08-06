@@ -17,7 +17,6 @@ RUN apt-get update && apt-get install -y \
     tree \
     bash-completion \
     zsh \
-    oh-my-zsh \
     tmux \
     screen \
     ffmpeg \
