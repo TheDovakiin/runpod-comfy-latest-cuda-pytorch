@@ -5,9 +5,11 @@ A RunPod template for ComfyUI with the latest PyTorch 2.7.1 and CUDA 12.8 suppor
 ## Features
 
 - **PyTorch 2.7.1** with **CUDA 12.8** support
-- **ComfyUI** with ComfyUI-Manager pre-installed
-- Persistent storage support for RunPod
-- Automatic setup on first run
+- **ComfyUI** with ComfyUI-Manager **pre-installed** (no downloads on first run!)
+- **Enhanced terminal experience** with autocomplete, better prompt, and helpful aliases
+- **Essential utilities**: zip, htop, tree, tmux, screen, vim, and more
+- **Instant startup** - everything stored in RunPod network storage
+- **Helper scripts** for easy management
 - Web interface on port 8188
 
 ## Quick Start
@@ -44,18 +46,24 @@ docker run -p 8188:8188 -v ./workspace:/workspace runpod-comfy-latest
 
 The container automatically:
 
-1. Clones ComfyUI and ComfyUI-Manager
-2. Creates a Python virtual environment
-3. Installs PyTorch with CUDA 12.8 support
-4. Installs all required dependencies
-5. Creates helper scripts for GPU/CPU operation
+1. **Copies pre-installed ComfyUI** to network storage (no downloads!)
+2. **Creates helper scripts** for easy management
+3. **Ready to use immediately** - no waiting for dependency installations
+
+### Enhanced Terminal Features
+
+- **Tab completion** for commands and files
+- **Colored prompt** showing current directory
+- **Useful aliases**: `ll`, `la`, `l` for better file listing
+- **Pre-installed utilities**: htop, tree, tmux, screen, vim, zip/unzip
 
 ## Helper Scripts
 
 After first run, you'll find these scripts in `/workspace`:
 
 - `run_gpu.sh` - Start ComfyUI with GPU acceleration
-- `run_cpu.sh` - Start ComfyUI in CPU-only mode
+- `run_cpu.sh` - Start ComfyUI in CPU-only mode  
+- `update_comfyui.sh` - Update ComfyUI and ComfyUI-Manager to latest versions
 
 ## Port Configuration
 

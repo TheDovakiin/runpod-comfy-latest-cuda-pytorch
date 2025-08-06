@@ -1,39 +1,49 @@
 #!/bin/bash
 
+# Set up better terminal experience
+export PS1="\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ "
+
 cd /workspace
 
-# First time setup
+# First time setup - copy pre-installed ComfyUI from /opt to network storage
 if [ ! -d "ComfyUI" ]; then
-    echo "First run detected. Installing ComfyUI and dependencies..."
-
-    git clone https://github.com/comfyanonymous/ComfyUI
-    cd ComfyUI/custom_nodes
-    git clone https://github.com/ltdrdata/ComfyUI-Manager comfyui-manager
-    cd /workspace
-
-    python3 -m venv venv
-    source venv/bin/activate
-
-    python -m pip install --upgrade pip
-    python -m pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu128
-    python -m pip install -r ComfyUI/requirements.txt
-    python -m pip install -r ComfyUI/custom_nodes/comfyui-manager/requirements.txt
-
+    echo "First run detected. Setting up ComfyUI from pre-installed image..."
+    
+    # Copy pre-installed ComfyUI to network storage
+    cp -r /opt/ComfyUI /workspace/
+    
+    echo "✅ ComfyUI copied to network storage"
+    
+    # Create helper scripts that don't need venv since everything is pre-installed
     echo "#!/bin/bash" > run_gpu.sh
-    echo "cd ComfyUI" >> run_gpu.sh
-    echo "source /workspace/venv/bin/activate" >> run_gpu.sh
-    echo "python main.py --preview-method auto" >> run_gpu.sh
+    echo "cd /workspace/ComfyUI" >> run_gpu.sh
+    echo "python main.py --preview-method auto --listen --port 8188" >> run_gpu.sh
     chmod +x run_gpu.sh
 
     echo "#!/bin/bash" > run_cpu.sh
-    echo "cd ComfyUI" >> run_cpu.sh
-    echo "source /workspace/venv/bin/activate" >> run_cpu.sh
-    echo "python main.py --preview-method auto --cpu" >> run_cpu.sh
+    echo "cd /workspace/ComfyUI" >> run_cpu.sh
+    echo "python main.py --preview-method auto --listen --port 8188 --cpu" >> run_cpu.sh
     chmod +x run_cpu.sh
+    
+    # Create update script
+    echo "#!/bin/bash" > update_comfyui.sh
+    echo "cd /workspace/ComfyUI" >> update_comfyui.sh
+    echo "git pull" >> update_comfyui.sh
+    echo "cd custom_nodes/ComfyUI-Manager" >> update_comfyui.sh
+    echo "git pull" >> update_comfyui.sh
+    echo "echo '✅ ComfyUI updated'" >> update_comfyui.sh
+    chmod +x update_comfyui.sh
+    
+    echo "✅ Helper scripts created:"
+    echo "  - run_gpu.sh: Start ComfyUI with GPU"
+    echo "  - run_cpu.sh: Start ComfyUI with CPU only"
+    echo "  - update_comfyui.sh: Update ComfyUI and ComfyUI-Manager"
+else
+    echo "✅ ComfyUI found in network storage"
 fi
 
 # Start ComfyUI
-cd ComfyUI
-source /workspace/venv/bin/activate
-echo "Starting ComfyUI on port 8188..."
+cd /workspace/ComfyUI
+echo "🚀 Starting ComfyUI on port 8188..."
+echo "🌐 Access ComfyUI at: http://[your-pod-ip]:8188"
 python main.py --preview-method auto --listen --port 8188
