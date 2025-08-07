@@ -223,7 +223,7 @@ if [ ! -d "/workspace/ComfyUI" ]; then
     echo "echo '✅ Tab completion and aliases enabled'" >> start_jupyter.sh
     echo "echo '✅ Enhanced prompt with current directory'" >> start_jupyter.sh
     echo "echo '🧪 Test utilities with: ./test_utilities.sh'" >> start_jupyter.sh
-    echo "jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --allow-origin='*' --no-token" >> start_jupyter.sh
+    echo "jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --ServerApp.token='' --ServerApp.password='' --ServerApp.disable_check_xsrf=True" >> start_jupyter.sh
     chmod +x start_jupyter.sh
     
     # Create dependency installer script
@@ -310,29 +310,17 @@ if [ ! -f /etc/bash.bashrc ]; then
     ln -sf ~/.bashrc /etc/bash.bashrc
 fi
 
-# Start JupyterLab with simplified command
-nohup jupyter lab > /workspace/jupyter.log 2>&1 &
+# Start JupyterLab with proper configuration
+nohup jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --ServerApp.token='' --ServerApp.password='' --ServerApp.disable_check_xsrf=True > jupyter.log 2>&1 &
 
 # Wait for JupyterLab to start
 sleep 5
 
 # Check if JupyterLab is actually running and accessible
 if pgrep -f "jupyter-lab" > /dev/null; then
-    echo "✅ JupyterLab process started!"
-    echo "📝 Check /workspace/jupyter.log for startup logs"
-    
-    # Test if port 8888 is actually listening
-    if netstat -tuln | grep -q ":8888 "; then
-        echo "✅ JupyterLab listening on port 8888!"
-    else
-        echo "❌ JupyterLab not listening on port 8888"
-        echo "📝 JupyterLab logs:"
-        tail -10 /workspace/jupyter.log
-    fi
+    echo "✅ JupyterLab started successfully!"
 else
-    echo "❌ JupyterLab failed to start!"
-    echo "📝 JupyterLab logs:"
-    cat /workspace/jupyter.log
+    echo "❌ JupyterLab failed to start, check jupyter.log"
 fi
 
 # Start ComfyUI
